@@ -1,0 +1,39 @@
+name: Publish the shul site
+# The site's code is kept in github.com/isckas/siach-hasadeh.
+# This publishes the latest version of it here every hour,
+# and right away when someone presses "Run workflow" on the Actions tab.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Get the latest site code
+        uses: actions/checkout@v4
+        with:
+          repository: isckas/siach-hasadeh
+          ref: main
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@v4
